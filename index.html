@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Render Figures</title>
+	<style>
+
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+			padding: 0;
+			overflow-x: hidden !important;
+		}
+
+		.tr-block {
+			position: absolute;
+			top: 10px;
+			left: 35px;
+			z-index: 5;
+		}
+
+		.create {
+			position: absolute;
+			top: 40px;
+			left: 35px;
+			z-index: 5;
+		}
+
+		.active {
+			left: calc(100% - 140px);
+			transition: 0.25s ease-in-out;
+		}
+
+	</style>
+</head>
+<body>
+	
+	<div class="tr-block">
+		<label for="transpar">Прозрачность</label>
+		<input type="checkbox" id="transpar">
+	</div>
+	<button class="create">
+		Создать фигуру
+	</button>
+
+
+
+
+	<script>
+			
+		const createBtn = document.querySelector('.create')
+		const trBlock = document.querySelector('.tr-block')
+		const checkbox = trBlock.querySelector('#transpar')
+		let once = true
+
+		createBtn.addEventListener('click', startIt)
+
+
+		let startX, startY, currentDiv;
+
+		function random(from, to) {
+			
+			const number = parseInt(from + Math.random() * to - from)
+
+			if (number < from) {
+				return from
+			}
+
+			if (number > to) {
+				return to
+			}
+
+			return number
+
+		}
+
+		document.addEventListener('mousemove', e => {
+			if (currentDiv) {
+
+				currentDiv.style.left = (e.clientX - startX) + 'px'
+				currentDiv.style.top = (e.clientY - startY) + 'px'
+
+			}
+		})
+
+		document.addEventListener('touchmove', e => {
+
+			if (currentDiv) {
+
+				currentDiv.style.left = (e.changedTouches[0].pageX - startX) + 'px'
+				currentDiv.style.top = (e.changedTouches[0].pageY - startY) + 'px'
+
+			}
+		})
+
+
+		function createDiv() {
+
+			const div = document.createElement('div')
+			div.style.position = 'absolute'
+			const minSize = 20
+			const maxSize = 200
+			div.style.width = random(minSize, maxSize) + 'px'
+			div.style.height = random(minSize, maxSize) + 'px'
+			div.style.top = random(0, window.innerHeight - parseInt(div.style.height)) + 'px'
+			div.style.left = random(0, window.innerWidth - parseInt(div.style.width)) + 'px'
+
+			let color = checkbox.checked ? random(0, 0xffffffff) : random(0, 0xffffff)
+			div.style.backgroundColor = '#' + color .toString(16)
+
+			div.addEventListener('mousedown', e => {
+				currentDiv = div
+				startX = e.offsetX
+				startY = e.offsetY
+
+				currentDiv.parentNode.appendChild(div)
+
+			})
+
+			div.addEventListener('touchstart', e => {
+				currentDiv = div
+				let rectPos = div.getBoundingClientRect()
+				startX = e.changedTouches[0].pageX - rectPos.left
+				startY = e.changedTouches[0].pageY - rectPos.top
+
+				currentDiv.parentNode.appendChild(div)
+
+			})
+
+			div.addEventListener('touchcancel', setCurrentNull)
+
+
+			div.addEventListener('touchend', setCurrentNull)
+
+			div.addEventListener('mouseup', setCurrentNull)
+
+			return div
+		}
+
+		function setCurrentNull() {
+			currentDiv = null
+		}
+
+
+
+		function startIt() {
+
+			console.log(this)
+
+			if (once) {
+				this.classList.add('active')
+				this.previousElementSibling.classList.add('active')
+				once = false
+			}
+
+			const div = createDiv()
+			document.body.appendChild(div)
+
+		}
+
+
+
+	</script>
+
+
+
+</body>
+</html>
